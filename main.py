@@ -22,7 +22,7 @@ russian_frequencies = dict(sorted(russian_frequencies.items(), key=lambda item: 
 russian_alphabet_sorted = list(russian_frequencies.keys())
 
 
-def calculate_coded_text_frequencies(coded_text, alphabet):
+def calculate_letter_frequencies(coded_text, alphabet):
     letters_count = dict.fromkeys(alphabet, 0)
     for char in coded_text:
         if char.isalpha():
@@ -33,21 +33,55 @@ def calculate_coded_text_frequencies(coded_text, alphabet):
 
 
 def calculate_shift(coded_text, alphabet, alphabet_sorted):
-    coded_text_frequencies = calculate_coded_text_frequencies(coded_text, alphabet)
+    coded_text_frequencies = calculate_letter_frequencies(coded_text, alphabet)
     coded_text_frequencies_sorted = dict(sorted(coded_text_frequencies.items(), key=lambda item: item[1], reverse=True))
     coded_text_alphabet_sorted = list(coded_text_frequencies_sorted.keys())
 
     shifts = []
     for coded_letter, letter in zip(coded_text_alphabet_sorted, alphabet_sorted):
         shifts.append((alphabet.index(coded_letter) - alphabet.index(letter)) % len(alphabet))
-    return max(set(shifts), key=shifts.count)
+    print(shifts)
+    return dict.fromkeys(alphabet, max(set(shifts), key=shifts.count))
 
 
-def caesar_decipher(coded_text, shift, alphabet):
+def calculate_key(coded_text, alphabet):
+    # This function is a placeholder for a more sophisticated key calculation method.
+    # For simplicity, we'll assume the key is a single letter repeated.
+    # In a real scenario, you would need a more sophisticated method to calculate the key.
+    coded_text_frequencies = calculate_letter_frequencies(coded_text, alphabet)
+    coded_text_frequencies_sorted = dict(sorted(coded_text_frequencies.items(), key=lambda item: item[1], reverse=True))
+    key = list(coded_text_frequencies_sorted.keys())[0] # Assuming the key is the most frequent letter
+    return key
+
+
+def caesar_decipher(coded_text, shifts, alphabet):
     deciphered_text = ""
     for char in coded_text:
         if char.isalpha():
             char_lower = char.lower()
+            if char_lower in shifts:
+                shift = shifts[char_lower]
+                index = alphabet.index(char_lower)
+                new_index = (index - shift) % len(alphabet)
+                deciphered_char = alphabet[new_index]
+                deciphered_char = deciphered_char.upper() if char.isupper() else deciphered_char
+                deciphered_text += deciphered_char
+            else:
+                deciphered_text += char
+        else:
+            deciphered_text += char
+    return deciphered_text
+
+
+def vigenere_decipher(coded_text, key, alphabet):
+    deciphered_text = ""
+    key_index = 0
+    for char in coded_text:
+        if char.isalpha():
+            char_lower = char.lower()
+            key_char = key[key_index % len(key)].lower()
+            key_index += 1
+            shift = (alphabet.index(key_char) - alphabet.index(char_lower)) % len(alphabet)
             index = alphabet.index(char_lower)
             new_index = (index - shift) % len(alphabet)
             deciphered_char = alphabet[new_index]
@@ -68,8 +102,8 @@ def frequency_crypto_analysis(coded_text, language):
     else:
         raise ValueError("Unsupported language")
 
-    shift = calculate_shift(coded_text, alphabet, alphabet_sorted)
-    deciphered_text = caesar_decipher(coded_text, shift, alphabet)
+    shifts = calculate_shift(coded_text, alphabet, alphabet_sorted)
+    deciphered_text = caesar_decipher(coded_text, shifts, alphabet)
     return deciphered_text
 
 
@@ -84,6 +118,6 @@ def write_to_file(text):
         file.write(text)
 
 
-# decoded = frequency_crypto_analysis(read_from_file('encoded_eng2.txt'), 'english')
-decoded = frequency_crypto_analysis(read_from_file('encoded_rus2.txt'), 'russian')
+decoded = frequency_crypto_analysis(read_from_file('encoded_eng.txt'), 'english')
+# decoded = frequency_crypto_analysis(read_from_file('encoded_rus2.txt'), 'russian')
 write_to_file(decoded)
