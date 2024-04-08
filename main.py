@@ -104,7 +104,7 @@ def count_words_count(words):
 
 
 def get_top_n_grams(words_count):
-    return ([k for k, v in words_count.items() if len(k) == i] for i in range(1, 5))
+    return ([k for k, v in words_count.items() if len(k) == i][:10] for i in range(1, 5))
 
 
 def calculate_shift_n_grams_freq(coded_text, lang, alphabet, alphabet_sorted,
