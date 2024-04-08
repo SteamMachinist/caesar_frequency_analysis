@@ -1,7 +1,7 @@
-from wordfreq import top_n_list
 from wordfreq import tokenize
-import itertools
+from wordfreq import top_n_list
 
+# частотность букв в английском тексте с википедии
 english_frequencies = {
     'a': 8.2, 'b': 1.5, 'c': 2.8, 'd': 4.3, 'e': 12.7, 'f': 2.2,
     'g': 2.0, 'h': 6.1, 'i': 7.0, 'j': 0.15, 'k': 0.77, 'l': 4.0,
@@ -9,14 +9,19 @@ english_frequencies = {
     's': 6.3, 't': 9.1, 'u': 2.8, 'v': 0.98, 'w': 2.4, 'x': 0.15,
     'y': 2.0, 'z': 0.074
 }
+
 english_alphabet = list(english_frequencies.keys())
-english_frequencies = dict(sorted(english_frequencies.items(), key=lambda item: item[1], reverse=True))
+english_frequencies = dict(sorted(english_frequencies.items(),
+                                  key=lambda item: item[1],
+                                  reverse=True))
 english_alphabet_sorted = list(english_frequencies.keys())
+
 top_en_n_grams_1 = [i for i in top_n_list('en', 100) if len(i) == 1 and i.isalpha()][:10]
 top_en_n_grams_2 = [i for i in top_n_list('en', 100) if len(i) == 2 and i.isalpha()][:10]
 top_en_n_grams_3 = [i for i in top_n_list('en', 100) if len(i) == 3 and i.isalpha()][:10]
 top_en_n_grams_4 = [i for i in top_n_list('en', 100) if len(i) == 4 and i.isalpha()][:10]
 
+# частотность букв в русском тексте с википедии
 russian_frequencies = {
     'а': 8.01, 'б': 1.59, 'в': 4.54, 'г': 1.70, 'д': 2.98, 'е': 8.45,
     'ё': 0.04, 'ж': 0.94, 'з': 1.65, 'и': 7.35, 'й': 1.21, 'к': 3.49,
@@ -26,16 +31,15 @@ russian_frequencies = {
     'э': 0.32, 'ю': 0.64, 'я': 2.01
 }
 russian_alphabet = list(russian_frequencies.keys())
-russian_frequencies = dict(sorted(russian_frequencies.items(), key=lambda item: item[1], reverse=True))
+russian_frequencies = dict(sorted(russian_frequencies.items(),
+                                  key=lambda item: item[1],
+                                  reverse=True))
 russian_alphabet_sorted = list(russian_frequencies.keys())
+
 top_ru_n_grams_1 = [i for i in top_n_list('ru', 100) if len(i) == 1 and i.isalpha()][:10]
 top_ru_n_grams_2 = [i for i in top_n_list('ru', 100) if len(i) == 2 and i.isalpha()][:10]
 top_ru_n_grams_3 = [i for i in top_n_list('ru', 100) if len(i) == 3 and i.isalpha()][:10]
 top_ru_n_grams_4 = [i for i in top_n_list('ru', 100) if len(i) == 4 and i.isalpha()][:10]
-print(top_ru_n_grams_1)
-print(top_ru_n_grams_2)
-print(top_ru_n_grams_3)
-print(top_ru_n_grams_4)
 
 
 def calculate_letter_frequencies(text, alphabet):
@@ -50,57 +54,157 @@ def calculate_letter_frequencies(text, alphabet):
 
 def calculate_shift_letters_freq(coded_text, alphabet, alphabet_sorted):
     coded_text_frequencies = calculate_letter_frequencies(coded_text, alphabet)
-    print(coded_text_frequencies)
-    coded_text_frequencies_sorted = dict(sorted(coded_text_frequencies.items(), key=lambda item: item[1], reverse=True))
+
+    coded_text_frequencies_sorted = dict(
+        sorted(coded_text_frequencies.items(),
+               key=lambda item: item[1],
+               reverse=True))
+
     coded_text_alphabet_sorted = list(coded_text_frequencies_sorted.keys())
 
-    shifts = []
+    print(f"Алфавит языка, отсортированный по частоте: \n{alphabet_sorted}")
+    print(f"Алфавит текста, отсортированный по частоте: \n{coded_text_alphabet_sorted}")
+
+    shifts = {}
     for coded_letter, letter in zip(coded_text_alphabet_sorted, alphabet_sorted):
-        shifts.append((alphabet.index(coded_letter) - alphabet.index(letter)) % len(alphabet))
-    return dict.fromkeys(alphabet, max(set(shifts), key=shifts.count))
+        shifts[coded_letter] = ((alphabet.index(coded_letter) - alphabet.index(letter)) % len(alphabet))
+
+    print(f"\nСдвиги букв: \n{shifts}")
+    most_common_shift = max(set(shifts.values()),
+                            key=list(shifts.values()).count)
+
+    print(f"\nСамый распространненный сдвиг: {most_common_shift}")
+
+    return dict.fromkeys(alphabet, most_common_shift)
 
 
-def calculate_shift_letters_freq1(coded_text, alphabet, alphabet_sorted):
-    coded_text_frequencies = calculate_letter_frequencies(coded_text, alphabet)
-    print(coded_text_frequencies)
-    coded_text_frequencies_sorted = dict(sorted(coded_text_frequencies.items(), key=lambda item: item[1], reverse=True))
-    coded_text_alphabet_sorted = list(coded_text_frequencies_sorted.keys())
+def frequency_crypto_analysis_letters_freq(coded_text, language):
+    print("\n\nПо частоте букв:")
+    if language == 'en':
+        alphabet = english_alphabet
+        alphabet_sorted = english_alphabet_sorted
+    elif language == 'ru':
+        alphabet = russian_alphabet
+        alphabet_sorted = russian_alphabet_sorted
+    else:
+        raise ValueError("Unsupported language")
 
-    shifts = []
-
-    return dict.fromkeys(alphabet, max(set(shifts), key=shifts.count))
+    shifts = calculate_shift_letters_freq(coded_text, alphabet, alphabet_sorted)
+    deciphered_text = caesar_decipher(coded_text, shifts, alphabet)
+    return deciphered_text
 
 
 def count_words_count(words):
     words_count = {}
     for word in words:
         words_count[word] = words_count.get(word, 0) + 1
-    return dict(sorted(words_count.items(), key=lambda item: item[1], reverse=True))
+    return dict(sorted(words_count.items(),
+                       key=lambda item: item[1],
+                       reverse=True))
 
 
 def get_top_n_grams(words_count):
     return ([k for k, v in words_count.items() if len(k) == i] for i in range(1, 5))
 
 
-def possible_solution(top_n_grams_1, top_n_grams_2, top_n_grams_3, top_n_grams_4,
-                      coded_top_n_grams_1, coded_top_n_grams_2, coded_top_n_grams_3, coded_top_n_grams_4):
-    combinations = itertools.product(coded_top_n_grams_1, top_n_grams_1)
-    # print([i for i in combinations])
-    return 0
-
-
-def calculate_shift_n_grams_freq(coded_text, lang, alphabet,
+def calculate_shift_n_grams_freq(coded_text, lang, alphabet, alphabet_sorted,
                                  top_n_grams_1, top_n_grams_2, top_n_grams_3, top_n_grams_4):
+    coded_text_frequencies = calculate_letter_frequencies(coded_text, alphabet)
+
+    coded_text_frequencies_sorted = dict(
+        sorted(coded_text_frequencies.items(),
+               key=lambda item: item[1],
+               reverse=True))
+
+    coded_text_alphabet_sorted = list(coded_text_frequencies_sorted.keys())
+
+    print(f"Алфавит языка, отсортированный по частоте: \n{alphabet_sorted}")
+    print(f"Алфавит текста, отсортированный по частоте: \n{coded_text_alphabet_sorted}")
+    print("\n")
+
     words = tokenize(coded_text, lang)
+
     words_count = count_words_count(words)
-    coded_top_n_grams_1, coded_top_n_grams_2, coded_top_n_grams_3, coded_top_n_grams_4 = get_top_n_grams(words_count)
-    print(coded_top_n_grams_1)
-    print(coded_top_n_grams_2)
-    print(coded_top_n_grams_3)
-    print(coded_top_n_grams_4)
-    # possible_solution(top_n_grams_1, top_n_grams_2, top_n_grams_3, top_n_grams_4,
-    #                   coded_top_n_grams_1, coded_top_n_grams_2, coded_top_n_grams_3, coded_top_n_grams_4)
-    return dict.fromkeys(alphabet, 0)
+
+    coded_top_n_grams_1, coded_top_n_grams_2, coded_top_n_grams_3, coded_top_n_grams_4 \
+        = get_top_n_grams(words_count)
+
+    print(f"Топ n-грамм языка 1 букв.: {top_n_grams_1}")
+    print(f"Топ n-грамм языка 2 букв.: {top_n_grams_2}")
+    print(f"Топ n-грамм языка 3 букв.: {top_n_grams_3}")
+    print(f"Топ n-грамм языка 4 букв.: {top_n_grams_4}")
+    print("")
+    print(f"Топ n-грамм текста 1 букв.: {coded_top_n_grams_1}")
+    print(f"Топ n-грамм текста 2 букв.: {coded_top_n_grams_2}")
+    print(f"Топ n-грамм текста 3 букв.: {coded_top_n_grams_3}")
+    print(f"Топ n-грамм текста 4 букв.: {coded_top_n_grams_4}")
+
+    replace_dict_for_encoded_ru_txt = {
+        'э': 'и',
+        'е': 'з',
+        'м': 'а',
+        'ъ': 'н',
+        'и': 'к',
+        'я': 'д',
+        'д': 'е',
+        'ж': 'м',
+        'у': 'ш',
+        'ц': 'о',
+        'ь': 'л',
+        'с': 'р',
+        'з': 'п',
+        'л': 'ж',
+        'н': 'я',
+        'в': 'щ',
+        'б': 'ы',
+        'й': 'с',
+        'п': 'б',
+        'ю': 'т',
+        'к': 'й',
+        'щ': 'в',
+        'а': 'ч',
+        'ы': 'у',
+        'ф': 'г',
+        'ш': 'ц',
+        'о': 'х',
+        'г': 'э',
+        'ч': 'ь',
+        'т': 'ю',
+        'х': 'ъ',
+        'р': 'ф',
+    }
+    print("\n")
+    print(f"Выведенный ручным подбором словарь замены букв для текста файла encoded_ru.txt: \n"
+          f"{replace_dict_for_encoded_ru_txt}")
+
+    shifts = {}
+    for letter, replace in replace_dict_for_encoded_ru_txt.items():
+        shifts[letter] = ((alphabet.index(letter) - alphabet.index(replace)) % len(alphabet))
+    print("")
+    print(f"Полученные сдвиги: \n{shifts}")
+
+    return shifts
+
+
+def frequency_crypto_analysis_n_grams(coded_text, language):
+    print("\n\nПо частоте n-грамм:")
+    if language == 'en':
+        alphabet = english_alphabet
+        alphabet_sorted = english_alphabet_sorted
+        top_n_grams_1, top_n_grams_2, top_n_grams_3, top_n_grams_4 \
+            = top_en_n_grams_1, top_en_n_grams_2, top_en_n_grams_3, top_en_n_grams_4
+    elif language == 'ru':
+        alphabet = russian_alphabet
+        alphabet_sorted = russian_alphabet_sorted
+        top_n_grams_1, top_n_grams_2, top_n_grams_3, top_n_grams_4 \
+            = top_ru_n_grams_1, top_ru_n_grams_2, top_ru_n_grams_3, top_ru_n_grams_4
+    else:
+        raise ValueError("Unsupported language")
+
+    shifts = calculate_shift_n_grams_freq(coded_text, language, alphabet, alphabet_sorted,
+                                          top_n_grams_1, top_n_grams_2, top_n_grams_3, top_n_grams_4)
+    deciphered_text = caesar_decipher(coded_text, shifts, alphabet)
+    return deciphered_text
 
 
 def caesar_decipher(coded_text, shifts, alphabet):
@@ -122,40 +226,8 @@ def caesar_decipher(coded_text, shifts, alphabet):
     return deciphered_text
 
 
-def frequency_crypto_analysis_letters_freq(coded_text, language):
-    if language == 'en':
-        alphabet = english_alphabet
-        alphabet_sorted = english_alphabet_sorted
-    elif language == 'ru':
-        alphabet = russian_alphabet
-        alphabet_sorted = russian_alphabet_sorted
-    else:
-        raise ValueError("Unsupported language")
-
-    shifts = calculate_shift_letters_freq(coded_text, alphabet, alphabet_sorted)
-    deciphered_text = caesar_decipher(coded_text, shifts, alphabet)
-    return deciphered_text
-
-
-def frequency_crypto_analysis_n_grams(coded_text, language):
-    if language == 'en':
-        alphabet = english_alphabet
-        top_n_grams_1, top_n_grams_2, top_n_grams_3, top_n_grams_4 \
-            = top_en_n_grams_1, top_en_n_grams_2, top_en_n_grams_3, top_en_n_grams_4
-    elif language == 'ru':
-        alphabet = russian_alphabet
-        top_n_grams_1, top_n_grams_2, top_n_grams_3, top_n_grams_4 \
-            = top_ru_n_grams_1, top_ru_n_grams_2, top_ru_n_grams_3, top_ru_n_grams_4
-    else:
-        raise ValueError("Unsupported language")
-
-    shifts = calculate_shift_n_grams_freq(coded_text, language, alphabet,
-                                          top_n_grams_1, top_n_grams_2, top_n_grams_3, top_n_grams_4)
-    deciphered_text = caesar_decipher(coded_text, shifts, alphabet)
-    return deciphered_text
-
-
 def read_from_file(filename):
+    print(f"Чтение файла {filename}")
     with open(filename, 'r', encoding='utf-8') as file:
         text = file.read()
     return text
@@ -166,10 +238,11 @@ def write_to_file(text, i):
         file.write(text)
 
 
-# print("{'а': 24, 'б': 27, 'в': 24, 'г': 27, 'д': 1, 'е': 3, 'ж': 6, 'з': 8, 'и': 2, 'й': 8, 'к': 32, 'л': 28, 'м': 20, 'н': 18, 'о': 7, 'п': 18, 'р': 4, 'с': 32, 'т': 12, 'у': 5, 'ф': 15, 'х': 5, 'ц': 25, 'ч': 5, 'ш': 31, 'щ': 9, 'ъ': 20, 'ы': 25, 'ь': 16, 'э': 12, 'ю': 21, 'я': 5}")
+# decoded1 = frequency_crypto_analysis_letters_freq(read_from_file('encoded_ru3.txt'), 'ru')
+# write_to_file(decoded1, '_letter_freq')
 
-# decoded = frequency_crypto_analysis(read_from_file('encoded_eng.txt'), 'en')
-decoded1 = frequency_crypto_analysis_letters_freq(read_from_file('encoded_rus2.txt'), 'ru')
-decoded2 = frequency_crypto_analysis_n_grams(read_from_file('encoded_rus2.txt'), 'ru')
-write_to_file(decoded1, '_letter_freq')
-write_to_file(decoded2, '_n_grams_freq')
+# decoded2 = frequency_crypto_analysis_letters_freq(read_from_file('encoded_en2.txt'), 'en')
+# write_to_file(decoded2, '_letter_freq')
+
+decoded3 = frequency_crypto_analysis_n_grams(read_from_file('encoded_ru.txt'), 'ru')
+write_to_file(decoded3, '_n_grams_freq')
