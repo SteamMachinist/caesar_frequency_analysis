@@ -60,6 +60,17 @@ def calculate_shift_letters_freq(coded_text, alphabet, alphabet_sorted):
     return dict.fromkeys(alphabet, max(set(shifts), key=shifts.count))
 
 
+def calculate_shift_letters_freq1(coded_text, alphabet, alphabet_sorted):
+    coded_text_frequencies = calculate_letter_frequencies(coded_text, alphabet)
+    print(coded_text_frequencies)
+    coded_text_frequencies_sorted = dict(sorted(coded_text_frequencies.items(), key=lambda item: item[1], reverse=True))
+    coded_text_alphabet_sorted = list(coded_text_frequencies_sorted.keys())
+
+    shifts = []
+
+    return dict.fromkeys(alphabet, max(set(shifts), key=shifts.count))
+
+
 def count_words_count(words):
     words_count = {}
     for word in words:
@@ -74,7 +85,7 @@ def get_top_n_grams(words_count):
 def possible_solution(top_n_grams_1, top_n_grams_2, top_n_grams_3, top_n_grams_4,
                       coded_top_n_grams_1, coded_top_n_grams_2, coded_top_n_grams_3, coded_top_n_grams_4):
     combinations = itertools.product(coded_top_n_grams_1, top_n_grams_1)
-    print([i for i in combinations])
+    # print([i for i in combinations])
     return 0
 
 
@@ -87,8 +98,8 @@ def calculate_shift_n_grams_freq(coded_text, lang, alphabet,
     print(coded_top_n_grams_2)
     print(coded_top_n_grams_3)
     print(coded_top_n_grams_4)
-    possible_solution(top_n_grams_1, top_n_grams_2, top_n_grams_3, top_n_grams_4,
-                      coded_top_n_grams_1, coded_top_n_grams_2, coded_top_n_grams_3, coded_top_n_grams_4)
+    # possible_solution(top_n_grams_1, top_n_grams_2, top_n_grams_3, top_n_grams_4,
+    #                   coded_top_n_grams_1, coded_top_n_grams_2, coded_top_n_grams_3, coded_top_n_grams_4)
     return dict.fromkeys(alphabet, 0)
 
 
@@ -158,7 +169,7 @@ def write_to_file(text, i):
 # print("{'а': 24, 'б': 27, 'в': 24, 'г': 27, 'д': 1, 'е': 3, 'ж': 6, 'з': 8, 'и': 2, 'й': 8, 'к': 32, 'л': 28, 'м': 20, 'н': 18, 'о': 7, 'п': 18, 'р': 4, 'с': 32, 'т': 12, 'у': 5, 'ф': 15, 'х': 5, 'ц': 25, 'ч': 5, 'ш': 31, 'щ': 9, 'ъ': 20, 'ы': 25, 'ь': 16, 'э': 12, 'ю': 21, 'я': 5}")
 
 # decoded = frequency_crypto_analysis(read_from_file('encoded_eng.txt'), 'en')
-decoded1 = frequency_crypto_analysis_letters_freq(read_from_file('encoded_rus.txt'), 'ru')
-decoded2 = frequency_crypto_analysis_n_grams(read_from_file('encoded_rus.txt'), 'ru')
+decoded1 = frequency_crypto_analysis_letters_freq(read_from_file('encoded_rus2.txt'), 'ru')
+decoded2 = frequency_crypto_analysis_n_grams(read_from_file('encoded_rus2.txt'), 'ru')
 write_to_file(decoded1, '_letter_freq')
 write_to_file(decoded2, '_n_grams_freq')
