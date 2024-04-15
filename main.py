@@ -238,11 +238,11 @@ def write_to_file(text, i):
         file.write(text)
 
 
-# decoded1 = frequency_crypto_analysis_letters_freq(read_from_file('encoded_ru3.txt'), 'ru')
-# write_to_file(decoded1, '_letter_freq')
+decoded1 = frequency_crypto_analysis_letters_freq(read_from_file('encoded_ru1.txt'), 'ru')
+write_to_file(decoded1, '_letter_freq')
 
-# decoded2 = frequency_crypto_analysis_letters_freq(read_from_file('encoded_en2.txt'), 'en')
+# decoded2 = frequency_crypto_analysis_letters_freq(read_from_file('encoded_en.txt'), 'en')
 # write_to_file(decoded2, '_letter_freq')
 
-decoded3 = frequency_crypto_analysis_n_grams(read_from_file('encoded_ru.txt'), 'ru')
-write_to_file(decoded3, '_n_grams_freq')
+# decoded3 = frequency_crypto_analysis_n_grams(read_from_file('encoded_ru.txt'), 'ru')
+# write_to_file(decoded3, '_n_grams_freq')
